@@ -64,6 +64,7 @@ body {
       var alphaButtons = 0.3;
       var left = 250
       var right = 600
+      var color = d3.scaleOrdinal(["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f"])
 
       var forceX = d3.forceX(function() {
         return width / 2
@@ -122,8 +123,8 @@ body {
         .append('circle')
         .attr('class', 'gi')
         .attr('r', radiusCollide)
-        .attr('fill', 'rgba(66, 244, 226, 0.1)')
-        .attr('stroke', 'rgba(255, 255, 255, 1)');
+        .attr("fill", function(d) { return color(d.codigo_entidad); })
+        .attr('stroke', function(d) { return color(d.codigo_entidad); });
 
       ////////////// Buttons to group nodes
       d3.select('#all').on('click', function() {
