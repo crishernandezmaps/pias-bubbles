@@ -2,193 +2,85 @@
 
 <head>
   <meta charset="utf-8">
-  <link href='css/main.css' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <script src="js/d3.v4.min.js"></script>
   <script src="js/tabletop.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-<style media="screen">
-body {
-  background: rgba(15, 22, 22,1);
-}
+  <style media="screen">
+    body {
+      background: rgba(163, 245, 207, 1);
+      color: #fff;
+      text-align: center;
+    }
 
-.side {
-  text-align: center;
-  padding-top: 3%;
-}
+    #cir {
+      width: 100%;
+      padding: inherit;
+      margin: auto;
+    }
 
-#chart {
-  text-align: center;
-}
-</style>
+    .side {
+      margin-top: 10%;
+      text-align: center;
+      padding-top: 3%;
+    }
+
+    #bubbles {
+      text-align: center;
+      margin: 0;
+    }
+
+    .bubls {
+      padding: 0;
+      margin: 0 auto;
+    }
+
+    #circle_pack {
+      text-align: center;
+    }
+
+    .node {
+      cursor: pointer;
+    }
+
+    .node:hover {
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+
+    .node--leaf {
+      fill: white;
+    }
+
+    .label {
+      font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+      text-anchor: middle;
+      text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+    }
+
+    .label,
+    .node--root,
+    .node--leaf {
+      pointer-events: none;
+    }
+  </style>
 
 </head>
 
 <body>
+  <section id="cir">
+    <div id='circle_pack'></div>
+  </section>
+  <section id="bub">
+    <div class='side'>
+      <button type="button" class="btn btn-info" id="all">Reagrupar</button>
+      <button type="button" class="btn btn-info" id="inoc">Inocuidad</button>
+      <button type="button" class="btn btn-info" id="ingc">Ingredientes críticos</button>
+      <button type="button" class="btn btn-info" id="funa">Funcionalidad alimentaria</button>
+    </div>
+    <div id='bubbles'></div>
+  </section>
 
-  <div class='side'>
-    <button type="button" class="btn btn-info" id="all">Agrupar</button>
-    <button type="button" class="btn btn-info" id="inoc">Inocuidad</button>
-    <button type="button" class="btn btn-info" id="ingc">Ingredientes críticos</button>
-    <button type="button" class="btn btn-info" id="funa">Funcionalidad alimentaria</button>
-  </div>
-  <div id='chart'></div>
-  <div class='content'>
-
-  </div>
-
-  <script>
-    ////////////////////////////////// D3 //////////////////////////////////
-    function drawChart(data) {
-
-      // Settings
-      var width = 900;
-      var height = 700;
-
-      var svg = d3.select('#chart')
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .append('g')
-        .attr('transform', 'translate(0,0)');
-
-      /////////// Building simulation
-      //// Adding forces ;)
-
-      // Settings
-      var radiusCollide = 17;
-      var button_collide = radiusCollide + 10;
-      var strengthValue = 0.1;
-      var alpha = 0.23;
-      var alphaAll = 0.03;
-      var alphaButtons = 0.3;
-      var left = 250
-      var right = 600
-      var color = d3.scaleOrdinal(["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f"])
-
-      var forceX = d3.forceX(function() {
-        return width / 2
-      }).strength(strengthValue).x(width * .5)
-
-      var forceY = d3.forceY(function() {
-        return height / 2
-      }).strength(strengthValue).y(height * .5)
-
-      var colliding = d3.forceCollide(function() {
-        return radiusCollide + 6
-      })
-
-      var collidingAfter = d3.forceCollide(function(){
-        return radiusCollide
-      })
-
-      var collidingButtons = d3.forceCollide(function (){
-        return button_collide
-      })
-
-      var inc = d3.forceX(function(d) {
-        if ((d.inocuidad).length > 0) {
-          return left
-        } else {
-          return right
-        }
-      })
-
-      var ing = d3.forceX(function(d) {
-        if ((d.ingredientes_criticos).length > 0) {
-          return left
-        } else {
-          return right
-        }
-      })
-
-      var fua = d3.forceX(function(d) {
-        if ((d.funcionalidad_alimentaria).length > 0) {
-          return left
-        } else {
-          return right
-        }
-      })
-
-      // Putting all together
-      var simulation = d3.forceSimulation()
-        .force('x', forceX)
-        .force('y', forceY)
-        .force('collide', colliding)
-
-      // Circles or Nodes - Potato, Potato...
-      var circles = svg.selectAll('.gi')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('class', 'gi')
-        .attr('r', radiusCollide)
-        .attr("fill", function(d) { return color(d.codigo_entidad); })
-        .attr('stroke', function(d) { return color(d.codigo_entidad); });
-
-      ////////////// Buttons to group nodes
-      d3.select('#all').on('click', function() {
-        simulation
-          .force('x', forceX)
-          .alphaTarget(alphaAll)
-          .restart()
-      })
-
-      d3.select('#inoc').on('click', function() {
-        simulation
-          .force('x', inc)
-          .force('collide', collidingButtons)
-          .alphaTarget(alphaButtons)
-          .restart()
-      })
-
-      d3.select('#ingc').on('click', function() {
-        simulation
-          .force('x', ing)
-          .force('collide', collidingButtons)
-          .alphaTarget(alphaButtons)
-          .restart()
-      })
-
-      d3.select('#funa').on('click', function() {
-        simulation
-          .force('x', fua)
-          .force('collide', collidingButtons)
-          .alphaTarget(alphaButtons)
-          .restart();
-      })
-
-      // Starting simulation
-      simulation.nodes(data)
-        .on('tick', ticked);
-
-      function ticked(){
-        circles
-          .attr('cx', function (d) { return d.x })
-          .attr('cy', function (d) { return d.y })
-      }
-
-    };
-    ////////////////////////////////// D3 - END //////////////////////////////////
-    ////////////////////////////////// Tabletop //////////////////////////////////
-    var pias = '1k1evTzwDEkuKoZQs9GT4Ny4ywPKXlXJzQuB8kZcfhBs';
-    var u = '14CoOreiOQwZxBk8L-j-THHp9qxRC4MkSizW9wboxYOo'
-
-    var options = {
-      key: u,
-      simpleSheet: true,
-      callback: draw
-    }
-
-    function renderSpreadsheetData() {
-      Tabletop.init(options)
-    }
-
-    function draw(data, tabletop) {
-      drawChart(data);
-    }
-
-    renderSpreadsheetData();
-    ////////////////////////////////// Tabletop - END//////////////////////////////////
-  </script>
+  <script src="js/bubbles.js"></script>
+  <script src="js/circle_pack.js"></script>
 </body>
